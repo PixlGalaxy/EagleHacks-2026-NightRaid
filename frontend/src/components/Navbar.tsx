@@ -11,10 +11,13 @@ const Navbar = () => (
           <Link to="/">Home</Link>
         </li>
         <li className="hover:text-blue-600 transition">
-          <Link to="/api-test">API Test</Link>
+          <Link to="/analysis">Analysis</Link>
         </li>
         <li className="hover:text-blue-600 transition">
           <Link to="/about">About</Link>
+        </li>
+        <li className="hover:text-blue-600 transition">
+          <Link to="/api-test">API Test</Link>
         </li>
       </ul>
     </div>
