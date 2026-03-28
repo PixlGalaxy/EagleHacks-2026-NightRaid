@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { API_ENDPOINTS, fetchAPI } from '../config';
-import { Send, Copy, RefreshCw, AlertCircle, CheckCircle, Loader } from 'lucide-react';
+import { Send, Copy, AlertCircle, CheckCircle, Loader } from 'lucide-react';
 
 const ApiTest: React.FC = () => {
   const [selectedEndpoint, setSelectedEndpoint] = useState<string>('uptime');
@@ -27,7 +27,6 @@ const ApiTest: React.FC = () => {
 
     try {
       let result;
-      const endpoint = endpoints.find((e) => e.id === selectedEndpoint);
 
       if (selectedEndpoint === 'ollama-generate') {
         result = await fetchAPI(API_ENDPOINTS.ollamaGenerate, {
