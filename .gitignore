@@ -1,0 +1,53 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# OS
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Distribution files
+dist/
+build/
+*.egg-info/
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+venv/
+env/
+.venv/
+
+# Docker
+.dockerignore
+
+# Misc
+*.tmp
+.cache/
