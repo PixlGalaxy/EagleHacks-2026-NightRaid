@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Home: React.FC = () => {
+  const navigate = useNavigate();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -11,7 +13,10 @@ const Home: React.FC = () => {
   };
 
   const handleUpload = async () => {
-    if (selectedFiles.length === 0) return;
+    if (selectedFiles.length === 0) {
+      alert("Select at least one file before uploading.");
+      return;
+    }
 
     setIsUploading(true);
     const formData = new FormData();
@@ -27,6 +32,14 @@ const Home: React.FC = () => {
 
       if (res.ok) {
         alert("Files uploaded successfully!");
+
+        const savedFiles = selectedFiles.map(file => ({
+          name: file.name,
+          type: file.type,
+          size: file.size,
+        }));
+
+        localStorage.setItem("uploadedFiles", JSON.stringify(savedFiles));
         setSelectedFiles([]);
       } else {
         alert("Upload failed. Please try again.");
@@ -112,7 +125,37 @@ const Home: React.FC = () => {
                   <li>Anomaly detection (outliers and fraud signals)</li>
                   <li>Risk index and opportunity score</li>
                 </ul>
-                <button className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                <button
+                  className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                  onClick={() => {
+                    const stored = localStorage.getItem("uploadedFiles");
+                    type FileMeta = { name: string; type: string; size: number };
+                    let filesForAnalysis: FileMeta[] = [];
+
+                    if (stored) {
+                      try {
+                        filesForAnalysis = JSON.parse(stored) as FileMeta[];
+                      } catch {
+                        filesForAnalysis = [];
+                      }
+                    }
+
+                    if (filesForAnalysis.length === 0 && selectedFiles.length > 0) {
+                      filesForAnalysis = selectedFiles.map(file => ({
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                      }));
+                    }
+
+                    if (filesForAnalysis.length === 0) {
+                      alert("Upload files first, then run analysis.");
+                      return;
+                    }
+
+                    navigate("/analysis", { state: { files: filesForAnalysis } });
+                  }}
+                >
                   Run Analysis
                 </button>
               </article>
@@ -159,5 +202,4 @@ const Home: React.FC = () => {
     </>
   );
 };
-
 export default Home;
