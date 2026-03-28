@@ -2,11 +2,41 @@ import React, { useState } from "react";
 
 const Home: React.FC = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     const validFiles = files.filter(file => file.type === "image/png" || file.type === "application/pdf");
     setSelectedFiles(validFiles);
+  };
+
+  const handleUpload = async () => {
+    if (selectedFiles.length === 0) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    selectedFiles.forEach((file, index) => {
+      formData.append(`file${index}`, file);
+    });
+
+    try {
+      const res = await fetch("http://localhost:5000/main/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) {
+        alert("Files uploaded successfully!");
+        setSelectedFiles([]);
+      } else {
+        alert("Upload failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("An error occurred during upload.");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -43,8 +73,12 @@ const Home: React.FC = () => {
                     onChange={handleFileChange}
                     className="w-full p-2 border border-slate-300 rounded-lg"
                   />
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                    Ingest Data
+                  <button 
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleUpload}
+                    disabled={selectedFiles.length === 0 || isUploading}
+                  >
+                    {isUploading ? "Uploading..." : "Ingest Data"}
                   </button>
                   {selectedFiles.length > 0 && (
                     <div className="mt-4">
