@@ -1,12 +1,15 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from transformers import pipeline
 from PIL import Image
 from io import BytesIO
+import pytorch
 import os
 
 pipeImageToText = pipeline("image-text-to-text", model="Qwen/Qwen3.5-0.8B")
 
 app = Flask("Dash")
+CORS(app)
 
 @app.route("/main/upload", methods=["POST"])
 def upload_image():
@@ -39,6 +42,8 @@ def upload_image():
         
         # Process through pipeline
         result = pipeImageToText(text=messages)
+
+        print("Model response:", result)  # Debugging statement
         
         return jsonify({"response": result}), 200
     
