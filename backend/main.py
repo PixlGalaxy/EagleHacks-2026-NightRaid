@@ -3,7 +3,6 @@ from flask_cors import CORS
 from transformers import pipeline
 from PIL import Image
 from io import BytesIO
-import pytorch
 import os
 
 pipeImageToText = pipeline("image-text-to-text", model="Qwen/Qwen3.5-0.8B")
@@ -51,27 +50,27 @@ def upload_image():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/1")
-def example():
+def example1():
     pass
 
 @app.route("/2")
-def example():
+def example2():
     pass
 
 @app.route("/3")
-def example():
+def example3():
     pass
 
 @app.route("/4")
-def example():
+def example4():
     pass
 
 @app.route("/5")
-def example():
+def example5():
     pass
 
 @app.route("/6")
-def example():
+def example6():
     pass
 
 if __name__ == "__main__":
