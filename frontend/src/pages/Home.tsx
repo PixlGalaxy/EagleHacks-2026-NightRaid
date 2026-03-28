@@ -1,24 +1,12 @@
 import React, { useState } from "react";
 
 const Home: React.FC = () => {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      setSelectedImage(null);
-      return;
-    }
-
-    if (file.type === "image/png") {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setSelectedImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setSelectedImage(null);
-    }
+    const files = Array.from(event.target.files || []);
+    const validFiles = files.filter(file => file.type === "image/png" || file.type === "application/pdf");
+    setSelectedFiles(validFiles);
   };
 
   return (
@@ -50,21 +38,31 @@ const Home: React.FC = () => {
                 <div className="mt-4 flex flex-col gap-2">
                   <input
                     type="file"
-                    accept=".json,.csv,.pdf,.txt,.png"
+                    accept=".png,.pdf"
+                    multiple
                     onChange={handleFileChange}
                     className="w-full p-2 border border-slate-300 rounded-lg"
                   />
                   <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                     Ingest Data
                   </button>
-                  {selectedImage && (
+                  {selectedFiles.length > 0 && (
                     <div className="mt-4">
-                      <p className="text-sm text-slate-500">PNG Preview:</p>
-                      <img
-                        src={selectedImage}
-                        alt="Uploaded PNG preview"
-                        className="mt-2 max-h-60 rounded-lg border border-slate-200"
-                      />
+                      <p className="text-sm text-slate-500">Uploaded Files:</p>
+                      <ul className="mt-2 space-y-2">
+                        {selectedFiles.map((file, index) => (
+                          <li key={index} className="flex items-center gap-2">
+                            <span className="text-sm">{file.name} ({file.type})</span>
+                            {file.type === "image/png" && (
+                              <img
+                                src={URL.createObjectURL(file)}
+                                alt={`Preview of ${file.name}`}
+                                className="max-h-20 rounded border border-slate-200"
+                              />
+                            )}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   )}
                 </div>
