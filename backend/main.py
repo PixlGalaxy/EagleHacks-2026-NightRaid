@@ -15,11 +15,13 @@ def upload_image():
     try:
         # Check if image file is in request
         if "image" not in request.files:
+            print("No image file provided in the request")  # Debugging statement
             return jsonify({"error": "No image file provided"}), 400
         
         file = request.files["image"]
         
         if file.filename == "":
+            print("No file selected for uploading")  # Debugging statement
             return jsonify({"error": "No file selected"}), 400
         
         # Get optional prompt from request
@@ -47,6 +49,7 @@ def upload_image():
         return jsonify({"response": result}), 200
     
     except Exception as e:
+        print("Error processing the image:", str(e))  # Debugging statement
         return jsonify({"error": str(e)}), 500
 
 @app.route("/1")
