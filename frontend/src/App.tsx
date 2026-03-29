@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Analysis from "./pages/Analysis";
-import ApiTest from "./pages/ApiTest";
+import About from "./pages/About";
 
 const App = () => (
   <Router>
@@ -10,7 +10,7 @@ const App = () => (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/analysis" element={<Analysis />} />
-      <Route path="/api-test" element={<ApiTest />} />
+      <Route path="/about" element={<About />} />
     </Routes>
   </Router>
 );
