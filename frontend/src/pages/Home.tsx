@@ -114,7 +114,7 @@ const Home: React.FC = () => {
 
   return (
     <>
-      <title>Symplistic.AI Banking Analyst</title>
+      <title>AI Banking Analyst</title>
       <meta
         name="description"
         content="Intelligent Banking Analyst demo UI with ingest, insights, risk signals, and recommendations."
