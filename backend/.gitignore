@@ -136,3 +136,4 @@ Thumbs.db
 # Project specific
 .env.*.local
 run.log
+uploads
