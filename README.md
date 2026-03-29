@@ -24,4 +24,9 @@ npm run dev
 
 > Requires [Ollama](https://ollama.com) running locally with a model loaded (default: `gpt-oss:20b`).
 
+## Documentation
+
+| [Frontend README](frontend/README.md) | React app, pages, components, env vars, build |
+| [Backend README](backend/README.md)   | API endpoints, file parsing, SSE streaming, config |
+
 
