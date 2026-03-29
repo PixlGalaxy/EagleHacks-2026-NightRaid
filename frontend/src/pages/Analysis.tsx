@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { API_BASE_URL } from "../config";
 import {
   ArrowLeft,
   BarChart2,
@@ -196,7 +197,7 @@ const Analysis: React.FC = () => {
     let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
 
     try {
-      const res = await fetch("http://localhost:5000/main/analyze/stream", {
+      const res = await fetch(`${API_BASE_URL}/main/analyze/stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Connection": "close" },
         body: JSON.stringify(payload),

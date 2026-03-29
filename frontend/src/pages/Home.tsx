@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 import {
   UploadCloud,
   File,
@@ -69,7 +70,7 @@ const Home: React.FC = () => {
     selectedFiles.forEach((file, idx) => formData.append(`file${idx}`, file));
 
     try {
-      const res = await fetch("http://localhost:5000/main/upload", {
+      const res = await fetch(`${API_BASE_URL}/main/upload`, {
         method: "POST",
         body: formData,
       });
