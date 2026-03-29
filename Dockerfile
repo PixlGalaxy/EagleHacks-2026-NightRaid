@@ -36,7 +36,7 @@ RUN chmod +x app.py
 COPY --from=build-backend /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 
 # Expose Ports
-EXPOSE 5000
+EXPOSE 7000
 
 # Start Commands
 CMD ["sh", "-c", "python /app/backend/app.py & nginx -g 'daemon off;'"]

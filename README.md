@@ -1,67 +1,32 @@
-## Technology Stack
+# NightRaid
 
-- Frontend Framework: React 19.2.4
-- Language: TypeScript 5.9.3
-- Build Tool: Vite 8.0.1
-- Styling: Tailwind CSS 3.3.3
-- Routing: React Router DOM 7.13.2
-- Code Quality: ESLint 9.39.4
+**NightRaid** is an AI-powered banking statement analyzer built for EagleHacks 2026. Upload your bank statements (PDF, Excel, CSV, Word, or plain text) and the app runs five parallel AI analyses — spending breakdown, anomaly detection, risk assessment, personalized recommendations, and an executive summary — all streamed in real time directly in the browser.
 
-## Prerequisites
+## Stack
 
-Before running the project, make sure you have installed:
+- **Frontend**: React 19 + TypeScript + Vite + Tailwind CSS
+- **Backend**: Flask + Ollama (local LLM)
+- **Infrastructure**: Docker + nginx
 
-- Node.js (version 18 or higher recommended)
-- npm (comes with Node.js)
-
-## Installation
-
-1. Navigate to the frontend directory:
+## Quick Start
 
 ```bash
+# Backend
+cd backend
+pip install -r requirements.txt
+python app.py
+
+# Frontend
 cd frontend
-```
-
-2. Install all dependencies:
-
-```bash
 npm install
-```
-
-## Running the Frontend
-
-### Development Mode
-
-Start the development server with hot module reloading:
-
-```bash
 npm run dev
 ```
 
-This will start the Vite development server, typically available at http://localhost:5173
+> Requires [Ollama](https://ollama.com) running locally with a model loaded (default: `gpt-oss:20b`).
 
-### Production Build
+## Documentation
 
-Build the application for production:
+| [Frontend README](frontend/README.md) | React app, pages, components, env vars, build |
+| [Backend README](backend/README.md)   | API endpoints, file parsing, SSE streaming, config |
 
-## Project Structure
-
-```
-frontend/
-├── src/
-│   ├── components/     - Reusable React components
-│   ├── pages/          - Page-level components
-│   ├── assets/         - Static assets (images, etc.)
-│   ├── App.tsx         - Main application component
-│   ├── main.tsx        - Application entry point
-│   ├── App.css         - Application styles
-│   └── index.css       - Global styles
-├── public/             - Static files served directly
-├── package.json        - Project dependencies and scripts
-├── tsconfig.json       - TypeScript configuration
-├── vite.config.ts      - Vite configuration
-├── tailwind.config.js  - Tailwind CSS configuration
-├── postcss.config.js   - PostCSS configuration
-└── eslint.config.js    - ESLint configuration
-```
 
