@@ -1,245 +1,331 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  UploadCloud,
+  File,
+  X,
+  Loader2,
+  ArrowRight,
+  BarChart2,
+  ShieldAlert,
+  AlertTriangle,
+  Lightbulb,
+  TrendingUp,
+  CheckCircle2,
+  PlayCircle,
+  Landmark,
+} from "lucide-react";
 
-// Home component: Main landing page for the Symplistic.AI Banking Analyst application
-// Handles file upload and navigation to analysis page
 const Home: React.FC = () => {
-  // Navigation hook for routing to analysis page
   const navigate = useNavigate();
-
-  // State for managing selected files before upload
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-
-  // State for tracking upload progress and disabling UI during upload
   const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
-  // Handle file selection from input element
-  // Filters to only accept PNG and PDF files
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    const validFiles = files.filter(file => file.type === "image/png" || file.type === "application/pdf");
-    setSelectedFiles(validFiles);
+  const processFiles = (files: FileList | File[]) => {
+    const arr = Array.from(files);
+    const valid = arr.filter((file) => {
+      const t = file.type;
+      const n = file.name.toLowerCase();
+      return (
+        t === "text/plain" ||
+        t === "text/csv" ||
+        t === "application/pdf" ||
+        t === "application/json" ||
+        t === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+        t === "application/vnd.ms-excel" ||
+        t === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+        t === "application/msword" ||
+        n.endsWith(".csv") || n.endsWith(".txt") || n.endsWith(".json") ||
+        n.endsWith(".pdf") || n.endsWith(".xlsx") || n.endsWith(".xls") ||
+        n.endsWith(".docx") || n.endsWith(".doc")
+      );
+    });
+    setSelectedFiles((prev) => {
+      const names = new Set(prev.map((f) => f.name));
+      return [...prev, ...valid.filter((f) => !names.has(f.name))];
+    });
   };
 
-  // Handle file upload to backend server
-  // Sends files as FormData to /main/upload endpoint
-  const handleUpload = async () => {
-    // Validate that files are selected before attempting upload
-    if (selectedFiles.length === 0) {
-      alert("Select at least one file before uploading.");
-      return;
-    }
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) processFiles(e.target.files);
+    e.target.value = "";
+  };
 
-    // Set uploading state to show progress and disable interactions
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files) processFiles(e.dataTransfer.files);
+  };
+
+  const removeFile = (name: string) =>
+    setSelectedFiles((prev) => prev.filter((f) => f.name !== name));
+
+  const handleUpload = async () => {
+    if (selectedFiles.length === 0) return;
     setIsUploading(true);
 
-    // Prepare FormData for multipart file upload
     const formData = new FormData();
-    selectedFiles.forEach((file, index) => {
-      formData.append(`file${index}`, file);
-    });
+    selectedFiles.forEach((file, idx) => formData.append(`file${idx}`, file));
 
     try {
-      // Send POST request to backend upload endpoint
       const res = await fetch("http://localhost:5000/main/upload", {
         method: "POST",
         body: formData,
       });
 
       if (res.ok) {
-        // Upload successful - show confirmation and save file metadata
-        alert("Files uploaded successfully!");
-
-        // Extract file metadata for persistence (name, type, size)
-        const savedFiles = selectedFiles.map(file => ({
-          name: file.name,
-          type: file.type,
-          size: file.size,
+        const savedFiles = selectedFiles.map((f) => ({
+          name: f.name,
+          type: f.type,
+          size: f.size,
         }));
-
-        // Store uploaded file metadata in localStorage for analysis page access
         localStorage.setItem("uploadedFiles", JSON.stringify(savedFiles));
-
-        // Clear selected files from state after successful upload
         setSelectedFiles([]);
       } else {
-        // Handle upload failure with user notification
         alert("Upload failed. Please try again.");
       }
-    } catch (error) {
-      // Handle network or other errors during upload
-      console.error("Upload error:", error);
+    } catch (err) {
+      console.error("Upload error:", err);
       alert("An error occurred during upload.");
     } finally {
-      // Always reset uploading state regardless of success/failure
       setIsUploading(false);
     }
   };
 
+  const handleRunAnalysis = () => {
+    const stored = localStorage.getItem("uploadedFiles");
+    type FileMeta = { name: string; type: string; size: number };
+    let filesForAnalysis: FileMeta[] = [];
+
+    if (stored) {
+      try { filesForAnalysis = JSON.parse(stored) as FileMeta[]; } catch { /* ignore */ }
+    }
+    if (filesForAnalysis.length === 0 && selectedFiles.length > 0) {
+      filesForAnalysis = selectedFiles.map((f) => ({ name: f.name, type: f.type, size: f.size }));
+    }
+    if (filesForAnalysis.length === 0) {
+      alert("Upload files first, then run analysis.");
+      return;
+    }
+    navigate("/analysis", { state: { files: filesForAnalysis } });
+  };
+
   return (
     <>
-      {/* Page metadata for SEO and browser tab */}
       <title>Symplistic.AI Banking Analyst</title>
       <meta
         name="description"
         content="Intelligent Banking Analyst demo UI with ingest, insights, risk signals, and recommendations."
       />
 
-      {/* Main page container with gradient background */}
       <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-blue-50 text-slate-800">
         <div className="max-w-6xl mx-auto px-6 py-12">
-          {/* Page header with title and description */}
+
+          {/* Header */}
           <header className="mb-10 text-center">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 mb-4 shadow-md">
+              <Landmark size={28} className="text-white" />
+            </div>
             <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-700">
-              Symplistic.AI Intelligent Banking Analyst
+              Intelligent Banking Analyst
             </h1>
-            <p className="mt-4 text-lg sm:text-xl text-slate-600">
+            <p className="mt-4 text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto">
               Analyze customer data, detect risks, and generate actionable financial insights.
             </p>
           </header>
 
-          {/* Main content sections */}
           <section className="space-y-6">
-            {/* Two-column grid for main features */}
             <div className="grid gap-4 md:grid-cols-2">
-              {/* Data Ingestion section - handles file upload */}
-              <article className="p-5 border border-blue-200 rounded-xl bg-white shadow-sm">
-                <h2 className="text-xl font-semibold text-blue-800">Data Ingestion</h2>
-                <p className="mt-2 text-sm text-slate-600">
-                  Upload transaction history, customer profiles, and documents for structured AI ingestion.
+
+              {/* Data Ingestion */}
+              <article className="p-6 border border-blue-200 rounded-xl bg-white shadow-sm flex flex-col gap-4">
+                <div className="flex items-center gap-2">
+                  <UploadCloud size={20} className="text-blue-600" />
+                  <h2 className="text-xl font-semibold text-blue-800">Data Ingestion</h2>
+                </div>
+                <p className="text-sm text-slate-600">
+                  Upload bank statement files (CSV, TXT, PDF, JSON, XLSX, XLS, DOCX, DOC) for AI-powered financial analysis.
                 </p>
-                <div className="mt-4 flex flex-col gap-2">
-                  {/* File input for selecting PNG/PDF files */}
+
+                {/* Drop zone */}
+                <label
+                  htmlFor="file-input"
+                  className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl p-8 cursor-pointer transition ${
+                    isDragging
+                      ? "border-blue-400 bg-blue-50"
+                      : "border-slate-300 hover:border-blue-400 hover:bg-slate-50"
+                  }`}
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleDrop}
+                >
+                  <UploadCloud
+                    size={36}
+                    className={isDragging ? "text-blue-500" : "text-slate-400"}
+                  />
+                  <span className="text-sm font-medium text-slate-600">
+                    Drag & drop files here, or{" "}
+                    <span className="text-blue-600 underline">browse</span>
+                  </span>
+                  <span className="text-xs text-slate-400">
+                    CSV · TXT · PDF · JSON · XLSX · XLS · DOCX · DOC
+                  </span>
                   <input
+                    id="file-input"
                     type="file"
-                    accept=".png,.pdf"
+                    accept=".csv,.txt,.pdf,.json,.xlsx,.xls,.docx,.doc"
                     multiple
                     onChange={handleFileChange}
-                    className="w-full p-2 border border-slate-300 rounded-lg"
+                    className="hidden"
                   />
+                </label>
 
-                  {/* Upload button - triggers file upload to backend */}
-                  <button
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={handleUpload}
-                    disabled={selectedFiles.length === 0 || isUploading}
-                  >
-                    {isUploading ? "Uploading..." : "Ingest Data"}
-                  </button>
+                {/* Selected files list */}
+                {selectedFiles.length > 0 && (
+                  <ul className="space-y-2">
+                    {selectedFiles.map((file) => (
+                      <li
+                        key={file.name}
+                        className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-200"
+                      >
+                        <File size={15} className="text-blue-500 shrink-0" />
+                        <span className="text-sm font-medium text-slate-700 truncate flex-1">
+                          {file.name}
+                        </span>
+                        <span className="text-xs text-slate-400 shrink-0">
+                          {(file.size / 1024).toFixed(1)} KB
+                        </span>
+                        <button
+                          onClick={() => removeFile(file.name)}
+                          className="text-slate-400 hover:text-red-500 transition shrink-0"
+                        >
+                          <X size={14} />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
-                  {/* Display selected files with previews */}
-                  {selectedFiles.length > 0 && (
-                    <div className="mt-4">
-                      <p className="text-sm text-slate-500">Uploaded Files:</p>
-                      <ul className="mt-2 space-y-2">
-                        {selectedFiles.map((file, index) => (
-                          <li key={index} className="flex items-center gap-2">
-                            <span className="text-sm">{file.name} ({file.type})</span>
-                            {/* Show image preview for PNG files */}
-                            {file.type === "image/png" && (
-                              <img
-                                src={URL.createObjectURL(file)}
-                                alt={`Preview of ${file.name}`}
-                                className="max-h-20 rounded border border-slate-200"
-                              />
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                <button
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm"
+                  onClick={handleUpload}
+                  disabled={selectedFiles.length === 0 || isUploading}
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 size={15} className="animate-spin" />
+                      Uploading…
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud size={15} />
+                      Ingest Data
+                    </>
                   )}
-                </div>
+                </button>
               </article>
 
-              {/* Analysis Workflow section - navigation to analysis page */}
-              <article className="p-5 border border-blue-200 rounded-xl bg-white shadow-sm">
-                <h2 className="text-xl font-semibold text-blue-800">Analysis Workflow</h2>
-                <p className="mt-2 text-sm text-slate-600">
+              {/* Analysis Workflow */}
+              <article className="p-6 border border-blue-200 rounded-xl bg-white shadow-sm flex flex-col gap-4">
+                <div className="flex items-center gap-2">
+                  <PlayCircle size={20} className="text-green-600" />
+                  <h2 className="text-xl font-semibold text-blue-800">Analysis Workflow</h2>
+                </div>
+                <p className="text-sm text-slate-600">
                   Use an orchestrated multi-step workflow for spending behavior, anomalous patterns, and risk projection.
                 </p>
-                <ul className="mt-3 list-disc list-inside text-sm text-slate-700">
-                  <li>Spending and saving behavior</li>
-                  <li>Anomaly detection (outliers and fraud signals)</li>
-                  <li>Risk index and opportunity score</li>
+                <ul className="space-y-2 text-sm text-slate-700">
+                  <li className="flex items-center gap-2">
+                    <BarChart2 size={15} className="text-blue-500 shrink-0" />
+                    Spending and saving behavior
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <ShieldAlert size={15} className="text-amber-500 shrink-0" />
+                    Anomaly detection (outliers and fraud signals)
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <AlertTriangle size={15} className="text-rose-500 shrink-0" />
+                    Risk index and opportunity score
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Lightbulb size={15} className="text-emerald-500 shrink-0" />
+                    Actionable financial recommendations
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <TrendingUp size={15} className="text-purple-500 shrink-0" />
+                    Executive-level financial summary
+                  </li>
                 </ul>
-
-                {/* Run Analysis button - navigates to analysis page with uploaded files */}
                 <button
-                  className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-                  onClick={() => {
-                    // Check for uploaded files in localStorage or current selection
-                    const stored = localStorage.getItem("uploadedFiles");
-                    type FileMeta = { name: string; type: string; size: number };
-                    let filesForAnalysis: FileMeta[] = [];
-
-                    if (stored) {
-                      try {
-                        filesForAnalysis = JSON.parse(stored) as FileMeta[];
-                      } catch {
-                        filesForAnalysis = [];
-                      }
-                    }
-
-                    // Fallback to current selected files if no stored files
-                    if (filesForAnalysis.length === 0 && selectedFiles.length > 0) {
-                      filesForAnalysis = selectedFiles.map(file => ({
-                        name: file.name,
-                        type: file.type,
-                        size: file.size,
-                      }));
-                    }
-
-                    // Require files before allowing analysis
-                    if (filesForAnalysis.length === 0) {
-                      alert("Upload files first, then run analysis.");
-                      return;
-                    }
-
-                    // Navigate to analysis page with file metadata
-                    navigate("/analysis", { state: { files: filesForAnalysis } });
-                  }}
+                  className="mt-auto flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium text-sm"
+                  onClick={handleRunAnalysis}
                 >
+                  <ArrowRight size={15} />
                   Run Analysis
                 </button>
               </article>
             </div>
 
-            {/* Expected Output section - shows what analysis will provide */}
-            <article className="p-5 border border-blue-200 rounded-xl bg-white shadow-sm">
-              <h2 className="text-xl font-semibold text-blue-800">Expected Output</h2>
-              <p className="mt-2 text-sm text-slate-600">
+            {/* Expected Output */}
+            <article className="p-6 border border-blue-200 rounded-xl bg-white shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <TrendingUp size={20} className="text-blue-600" />
+                <h2 className="text-xl font-semibold text-blue-800">Expected Output</h2>
+              </div>
+              <p className="text-sm text-slate-600 mb-4">
                 Provide evidence-backed insights with clear recommendations and risk-next steps.
               </p>
-
-              {/* Grid of output categories */}
-              <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <div className="p-3 rounded-lg bg-sky-50 border border-sky-100">
-                  <h3 className="font-semibold text-sky-700">Insights</h3>
-                  <p className="text-xs text-slate-600 mt-2">Spending behavior summary and trends.</p>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="p-3 rounded-lg bg-sky-50 border border-sky-100 flex flex-col gap-1">
+                  <div className="flex items-center gap-1.5">
+                    <BarChart2 size={15} className="text-sky-600" />
+                    <h3 className="font-semibold text-sky-700">Insights</h3>
+                  </div>
+                  <p className="text-xs text-slate-600">Spending behavior summary and trends.</p>
                 </div>
-                <div className="p-3 rounded-lg bg-amber-50 border border-amber-100">
-                  <h3 className="font-semibold text-amber-700">Anomalies</h3>
-                  <p className="text-xs text-slate-600 mt-2">Detected unusual transactions and inconsistencies.</p>
+                <div className="p-3 rounded-lg bg-amber-50 border border-amber-100 flex flex-col gap-1">
+                  <div className="flex items-center gap-1.5">
+                    <ShieldAlert size={15} className="text-amber-600" />
+                    <h3 className="font-semibold text-amber-700">Anomalies</h3>
+                  </div>
+                  <p className="text-xs text-slate-600">Detected unusual transactions and inconsistencies.</p>
                 </div>
-                <div className="p-3 rounded-lg bg-rose-50 border border-rose-100">
-                  <h3 className="font-semibold text-rose-700">Risk Signals</h3>
-                  <p className="text-xs text-slate-600 mt-2">High-risk flags and weak financial controls.</p>
+                <div className="p-3 rounded-lg bg-rose-50 border border-rose-100 flex flex-col gap-1">
+                  <div className="flex items-center gap-1.5">
+                    <AlertTriangle size={15} className="text-rose-600" />
+                    <h3 className="font-semibold text-rose-700">Risk Signals</h3>
+                  </div>
+                  <p className="text-xs text-slate-600">High-risk flags and weak financial controls.</p>
                 </div>
-                <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100">
-                  <h3 className="font-semibold text-emerald-700">Recommendations</h3>
-                  <p className="text-xs text-slate-600 mt-2">Actionable steps and next opportunities.</p>
+                <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100 flex flex-col gap-1">
+                  <div className="flex items-center gap-1.5">
+                    <Lightbulb size={15} className="text-emerald-600" />
+                    <h3 className="font-semibold text-emerald-700">Recommendations</h3>
+                  </div>
+                  <p className="text-xs text-slate-600">Actionable steps and next opportunities.</p>
                 </div>
               </div>
             </article>
 
-            {/* Judge Criteria section - evaluation requirements */}
-            <article className="p-5 border border-blue-200 rounded-xl bg-white shadow-sm">
-              <h2 className="text-xl font-semibold text-blue-800">Judge Criteria</h2>
-              <ul className="mt-3 space-y-2 text-sm text-slate-700 list-disc list-inside">
-                <li>Ingest structured and unstructured data.</li>
-                <li>Surface meaningful insights with evidence references.</li>
-                <li>Identify risk/inconsistency across sources.</li>
-                <li>Deliver clear, actionable next steps.</li>
+            {/* Judge Criteria */}
+            <article className="p-6 border border-blue-200 rounded-xl bg-white shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <CheckCircle2 size={20} className="text-blue-600" />
+                <h2 className="text-xl font-semibold text-blue-800">Judge Criteria</h2>
+              </div>
+              <ul className="space-y-2 text-sm text-slate-700">
+                {[
+                  "Ingest structured and unstructured data.",
+                  "Surface meaningful insights with evidence references.",
+                  "Identify risk and inconsistency across sources.",
+                  "Deliver clear, actionable next steps.",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <CheckCircle2 size={14} className="text-emerald-500 mt-0.5 shrink-0" />
+                    {item}
+                  </li>
+                ))}
               </ul>
             </article>
           </section>
@@ -248,4 +334,6 @@ const Home: React.FC = () => {
     </>
   );
 };
+
 export default Home;
+
