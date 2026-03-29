@@ -2,6 +2,10 @@
 
 **NightRaid** is an AI-powered banking statement analyzer built for EagleHacks 2026. Upload your bank statements (PDF, Excel, CSV, Word, or plain text) and the app runs five parallel AI analyses — spending breakdown, anomaly detection, risk assessment, personalized recommendations, and an executive summary — all streamed in real time directly in the browser.
 
+## URL
+
+**URL**: https://eaglehacks.fabriziogamboa.com/
+
 ## Stack
 
 - **Frontend**: React 19 + TypeScript + Vite + Tailwind CSS
