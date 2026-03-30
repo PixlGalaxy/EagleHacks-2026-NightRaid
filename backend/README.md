@@ -268,3 +268,9 @@ In the container:
 - Uploaded files persist inside the container at `/app/backend/uploads/`. Mount a volume if persistence across restarts is needed.
 
 ---
+## Developeers
+
+[PixlGalaxy](https://github.com/PixlGalaxy) 
+[EvanG64](https://github.com/EvanG64)
+[yudintsevtimofey](https://github.com/yudintsevtimofey)
+---
